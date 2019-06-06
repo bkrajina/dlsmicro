@@ -1,6 +1,5 @@
 import numpy as np
 from scipy import special
-import utils
 
 
 class Micro:
