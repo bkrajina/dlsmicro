@@ -9,14 +9,19 @@ def calc_g1(g2, g0, ergodic, Ip=None, Ie=None, eps=None):
     g2 : 1d-array
          Scattering intensity autocorrelation function
     g0 : float
-         Intercept of g2 - 1 at time 0
+         Intercept of ``g2 - 1`` at time 0
     ergodic: boolean
-             If False, corrections are made for non-ergodic systems based on Ip and Ie
+             If ``False``, corrections are made for non-ergodic systems based on ``Ip`` and ``Ie``
     Ip: float
         Scattering intensity at the position where correlation function is collected.
-        (Only used if Ergodic is False)
+        (Only used if Ergodic is ``False``)
     Ie: 1d-array
         Vector of scattering intensities at different positions in the cuvette
+
+    Returns
+    -------
+    g1: 1d-array 
+        The intermediate scattering function
     """
     if ergodic:
         g1 = np.sqrt((g2-1.)/g0)

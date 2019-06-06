@@ -154,14 +154,19 @@
 <span class="sd">    g2 : 1d-array</span>
 <span class="sd">         Scattering intensity autocorrelation function</span>
 <span class="sd">    g0 : float</span>
-<span class="sd">         Intercept of g2 - 1 at time 0</span>
+<span class="sd">         Intercept of ``g2 - 1`` at time 0</span>
 <span class="sd">    ergodic: boolean</span>
-<span class="sd">             If False, corrections are made for non-ergodic systems based on Ip and Ie</span>
+<span class="sd">             If ``False``, corrections are made for non-ergodic systems based on ``Ip`` and ``Ie``</span>
 <span class="sd">    Ip: float</span>
 <span class="sd">        Scattering intensity at the position where correlation function is collected.</span>
-<span class="sd">        (Only used if Ergodic is False)</span>
+<span class="sd">        (Only used if Ergodic is ``False``)</span>
 <span class="sd">    Ie: 1d-array</span>
 <span class="sd">        Vector of scattering intensities at different positions in the cuvette</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    g1: 1d-array </span>
+<span class="sd">        The intermediate scattering function</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">ergodic</span><span class="p">:</span>
         <span class="n">g1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">g2</span><span class="o">-</span><span class="mf">1.</span><span class="p">)</span><span class="o">/</span><span class="n">g0</span><span class="p">)</span>

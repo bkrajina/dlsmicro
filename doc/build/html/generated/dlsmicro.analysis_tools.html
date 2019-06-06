@@ -33,7 +33,8 @@
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="API reference" href="../api.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -78,8 +79,14 @@
             
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../api.html">API documentation</a></li>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API documentation</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#calulate-intermediate-scattering-function">Calulate intermediate scattering function</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">dlsmicro.analysis_tools</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 
             
@@ -125,6 +132,8 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
+          <li><a href="../api.html">API reference</a> &raquo;</li>
+        
       <li>dlsmicro.analysis_tools</li>
     
     
@@ -154,14 +163,18 @@
 <dt>g2 <span class="classifier-delimiter">:</span> <span class="classifier">1d-array</span></dt>
 <dd>Scattering intensity autocorrelation function</dd>
 <dt>g0 <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd>Intercept of g2 - 1 at time 0</dd>
+<dd>Intercept of <code class="docutils literal notranslate"><span class="pre">g2</span> <span class="pre">-</span> <span class="pre">1</span></code> at time 0</dd>
 <dt>ergodic: boolean</dt>
-<dd>If False, corrections are made for non-ergodic systems based on Ip and Ie</dd>
+<dd>If <code class="docutils literal notranslate"><span class="pre">False</span></code>, corrections are made for non-ergodic systems based on <code class="docutils literal notranslate"><span class="pre">Ip</span></code> and <code class="docutils literal notranslate"><span class="pre">Ie</span></code></dd>
 <dt>Ip: float</dt>
 <dd>Scattering intensity at the position where correlation function is collected.
-(Only used if Ergodic is False)</dd>
+(Only used if Ergodic is <code class="docutils literal notranslate"><span class="pre">False</span></code>)</dd>
 <dt>Ie: 1d-array</dt>
 <dd>Vector of scattering intensities at different positions in the cuvette</dd>
+</dl>
+<dl class="docutils">
+<dt>g1: 1d-array </dt>
+<dd>The intermediate scattering function</dd>
 </dl>
 </dd></dl>
 
@@ -172,6 +185,13 @@
            
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="../api.html" class="btn btn-neutral float-left" title="API reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>
