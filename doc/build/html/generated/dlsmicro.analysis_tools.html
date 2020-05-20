@@ -34,7 +34,7 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="prev" title="API reference" href="../api.html" /> 
+    <link rel="prev" title="dlsmicro.io" href="dlsmicro.io.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -81,7 +81,8 @@
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API documentation</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="../api.html#calulate-intermediate-scattering-function">Calulate intermediate scattering function</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../api.html#read-data-exported-from-zetasizer">Read data exported from Zetasizer</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#computed-particle-motion-statistics-and-rheological-properties">Computed particle motion statistics and rheological properties</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">dlsmicro.analysis_tools</a></li>
 </ul>
 </li>
@@ -153,29 +154,326 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="dlsmicro-analysis-tools">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast,
+.nboutput.nblast {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast + .nbinput {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="dlsmicro-analysis-tools">
 <span id="id1"></span><h1>dlsmicro.analysis_tools<a class="headerlink" href="#dlsmicro-analysis-tools" title="Permalink to this headline">¶</a></h1>
-<span class="target" id="module-dlsmicro.analysis_tools"></span><dl class="function">
+<span class="target" id="module-dlsmicro.analysis_tools"></span><p>Module for processing DLS correlation data into rheological properties</p>
+<dl class="function">
 <dt id="dlsmicro.analysis_tools.calc_g1">
-<code class="descclassname">dlsmicro.analysis_tools.</code><code class="descname">calc_g1</code><span class="sig-paren">(</span><em>g2</em>, <em>g0</em>, <em>ergodic</em>, <em>Ip=None</em>, <em>Ie=None</em>, <em>eps=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dlsmicro/analysis_tools.html#calc_g1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dlsmicro.analysis_tools.calc_g1" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate g1 intermediate scattering function from intensity autocorrelation</p>
-<dl class="docutils">
-<dt>g2 <span class="classifier-delimiter">:</span> <span class="classifier">1d-array</span></dt>
-<dd>Scattering intensity autocorrelation function</dd>
-<dt>g0 <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd>Intercept of <code class="docutils literal notranslate"><span class="pre">g2</span> <span class="pre">-</span> <span class="pre">1</span></code> at time 0</dd>
-<dt>ergodic: boolean</dt>
-<dd>If <code class="docutils literal notranslate"><span class="pre">False</span></code>, corrections are made for non-ergodic systems based on <code class="docutils literal notranslate"><span class="pre">Ip</span></code> and <code class="docutils literal notranslate"><span class="pre">Ie</span></code></dd>
-<dt>Ip: float</dt>
-<dd>Scattering intensity at the position where correlation function is collected.
-(Only used if Ergodic is <code class="docutils literal notranslate"><span class="pre">False</span></code>)</dd>
-<dt>Ie: 1d-array</dt>
-<dd>Vector of scattering intensities at different positions in the cuvette</dd>
+<code class="descclassname">dlsmicro.analysis_tools.</code><code class="descname">calc_g1</code><span class="sig-paren">(</span><em>t</em>, <em>corr</em>, <em>ergodic</em>, <em>g0=None</em>, <em>Ip=None</em>, <em>Ie=None</em>, <em>eps=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dlsmicro/analysis_tools.html#calc_g1"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dlsmicro.analysis_tools.calc_g1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the intermediate scattering function from the
+intensity autocorrelation</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>t</strong> (<em>1d-array</em>) – Vector of time-lags at which the correlation function is computed</li>
+<li><strong>corr</strong> (<em>1d-array</em>) – Correlation coefficient (which spans possible from 0.0 to 1.0).
+Note that this is equal to <cite>g2 - 1</cite>, where <cite>g2</cite> is the intensity
+autocorrelation function.</li>
+<li><strong>ergodic</strong> (<em>boolean</em>) – If False, corrections are made for non-ergodic systems
+based on <code class="docutils literal notranslate"><span class="pre">Ip</span></code> and <code class="docutils literal notranslate"><span class="pre">Ie</span></code></li>
+<li><strong>Ip</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Scattering intensity at the position
+where correlation function is collected.
+(Only used if <code class="docutils literal notranslate"><span class="pre">ergodic=False</span></code>)</li>
+<li><strong>Ie</strong> (<em>1d-array</em>) – Vector of scattering intensities at different positions in the cuvette
+(Only used if <code class="docutils literal notranslate"><span class="pre">ergodic=False</span></code>)</li>
+<li><strong>g0</strong> (float, <cite>optional</cite>) – Estimate of the intercept of <code class="docutils literal notranslate"><span class="pre">g2</span> <span class="pre">-</span> <span class="pre">1</span></code> at time 0. If not provided,
+the intercept will be estimated automatically based on a stretched
+exponential fit.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>g1</strong> – The intermediate scattering function corresponding to
+the time-lags <code class="docutils literal notranslate"><span class="pre">t</span></code></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">1d-array</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>The correlation function exported by the Zetasizer software is equal to
+<code class="docutils literal notranslate"><span class="pre">g2</span> <span class="pre">-</span> <span class="pre">1</span></code></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dlsmicro.analysis_tools.calc_msd_raw">
+<code class="descclassname">dlsmicro.analysis_tools.</code><code class="descname">calc_msd_raw</code><span class="sig-paren">(</span><em>t</em>, <em>g1</em>, <em>q</em>, <em>replace_neg=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dlsmicro/analysis_tools.html#calc_msd_raw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dlsmicro.analysis_tools.calc_msd_raw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the MSD without smoothing from the intermediate scattering
+function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>t</strong> (<em>1d-array</em>) – Vector of time-lags</li>
+<li><strong>g1</strong> (<em>1d-array</em>) – Vector containing the intermediate scattering function at time-lags
+<code class="docutils literal notranslate"><span class="pre">t</span></code></li>
+<li><strong>q</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Scattering vector in units of 1/nm</li>
+<li><strong>replace_neg</strong> (boolean, <cite>optional</cite>) – If <code class="docutils literal notranslate"><span class="pre">True</span></code>, replace negative values of the MSD by linear
+interpolation</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>msd</strong> – Vector of mean-squared-displacements at time-lags <code class="docutils literal notranslate"><span class="pre">t</span></code>
+(in units of nm^2)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">1d-array</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="dlsmicro.analysis_tools.calc_q">
+<code class="descclassname">dlsmicro.analysis_tools.</code><code class="descname">calc_q</code><span class="sig-paren">(</span><em>n</em>, <em>theta</em>, <em>lam</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dlsmicro/analysis_tools.html#calc_q"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dlsmicro.analysis_tools.calc_q" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the scattering wave-vector.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Index of refraction of the material (1.333 for water)</li>
+<li><strong>theta</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Scattering angle in radians</li>
+<li><strong>lam</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – wave-length of laser (units used here determine the
+units of <code class="docutils literal notranslate"><span class="pre">q</span></code>)</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>q</strong> – Scattering wave-vector in inverse units of <code class="docutils literal notranslate"><span class="pre">1/lam</span></code></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)">float</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="dlsmicro.analysis_tools.find_g0">
+<code class="descclassname">dlsmicro.analysis_tools.</code><code class="descname">find_g0</code><span class="sig-paren">(</span><em>t</em>, <em>corr</em>, <em>func=&lt;function stretched_exp&gt;</em>, <em>t0=2.0</em>, <em>tmaxs=array([ 40.</em>, <em>50.</em>, <em>60.</em>, <em>70.</em>, <em>80.</em>, <em>90.</em>, <em>100.</em>, <em>110.</em>, <em>120.])</em>, <em>p0=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dlsmicro/analysis_tools.html#find_g0"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dlsmicro.analysis_tools.find_g0" title="Permalink to this definition">¶</a></dt>
+<dd><p>Estimate the intercept of the correlation function at t = 0</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>t</strong> (<em>1d-array</em>) – Vector of time-lags at which the correlation coefficient is computed</li>
+<li><strong>corr</strong> (<em>1d-array</em>) – Correlation coefficient (which spans possible from 0.0 to 1.0).
+Note that this is equal to <cite>g2 - 1</cite>, where <cite>g2</cite> is the intensity
+autocorrelation function.</li>
+<li><strong>func</strong> (<em>callable function</em>) – Model to fit the correlation against. Must be of the form
+<cite>f(t, p1, p2, …, pM)</cite> where <cite>t</cite> is the independent variable and
+<cite>p1, p2, …, pM</cite> is a set of M parameters to fit.</li>
+<li><strong>t0</strong> (float, <cite>optional</cite>) – Minimum time-lag to use in the fit of the correlation coefficient
+for estimating the intercept.</li>
+<li><strong>tmaxs</strong> (1-d array or list of floats, <cite>optional</cite>) – Vector of possible maximum time-lags to use in the fitting interval
+of the correlation coefficient. The optimal tmax will be selected
+based on minimization of the cross-validation error of the fit.</li>
+<li><strong>p0</strong> (1-d array, <cite>optional</cite>) – Initial guesses for the parameters to <code class="docutils literal notranslate"><span class="pre">func</span></code> for fitting</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>g0</strong> (<em>float</em>) – Estimate of the intercept of <code class="docutils literal notranslate"><span class="pre">corr</span></code> at <cite>t=0</cite></li>
+<li><strong>twindow_min</strong> (<em>List of floats</em>) – Optimized interval in time over which the fit to <code class="docutils literal notranslate"><span class="pre">corr</span></code>
+was performed to obtain g0. This is a list
+of the form [t0, tmax].</li>
+<li><strong>pmin</strong> (<em>1d-array</em>) – Optimal values for the fitting parameters to <code class="docutils literal notranslate"><span class="pre">func</span></code> used to
+estimate <code class="docutils literal notranslate"><span class="pre">g0</span></code></li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="dlsmicro.analysis_tools.full_dlsur_analysis">
+<code class="descclassname">dlsmicro.analysis_tools.</code><code class="descname">full_dlsur_analysis</code><span class="sig-paren">(</span><em>t</em>, <em>corr</em>, <em>ergodic</em>, <em>r</em>, <em>T</em>, <em>q</em>, <em>Ip</em>, <em>Ie</em>, <em>calc_g1_kws=None</em>, <em>pwr_law_kws=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dlsmicro/analysis_tools.html#full_dlsur_analysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dlsmicro.analysis_tools.full_dlsur_analysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform a full DLS microrheology analysis from
+correlation and scattering intensity data to obtain particle
+motion statistics and rheological properties</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>t</strong> (<em>1d-array</em>) – Vector of lag-times (in microseconds)</li>
+<li><strong>corr</strong> (<em>1d-array</em>) – Vector of values of the correlation coefficient, corresponding
+to the time-lags <code class="docutils literal notranslate"><span class="pre">t</span></code>.</li>
+<li><strong>ergodic</strong> (<em>boolean</em>) – If <code class="docutils literal notranslate"><span class="pre">ergodic==False</span></code> then corrections are applied to the
+calculation of <cite>g1</cite>, based on <code class="docutils literal notranslate"><span class="pre">Ip</span></code> and <code class="docutils literal notranslate"><span class="pre">Ie</span></code></li>
+<li><strong>r</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Particle radius in nanometers</li>
+<li><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Temperature in Kelvin</li>
+<li><strong>q</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Scattering vector in 1/nm</li>
+<li><strong>Ip</strong> (float, <cite>optional</cite>) – Scattering intensity at the meausurement position where <code class="docutils literal notranslate"><span class="pre">corr</span></code>
+is collected</li>
+<li><strong>Ie</strong> (<em>1d-array</em>) – Vector of scattering intensities at different measurement positions
+in the cuvette</li>
+<li><strong>calc_g1_kws</strong> (dictionary, <cite>optional</cite>) – Dictionary of keyword arguments to pass to
+<code class="docutils literal notranslate"><span class="pre">analysis.tools.calc_g1()</span></code> for computing the
+intermediate scattering function</li>
+<li><strong>pwr_law_kws</strong> (dictionary, <cite>optional</cite>) – Dictionary of keyword arguments to pass to
+<code class="docutils literal notranslate"><span class="pre">analysis_tools.msd_local_pwr_law()</span></code> for local
+power-law analysis of the msd</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>dlsmicro_df</strong> (<em>pandas DataFrame</em>) – Dataframe containing table of results from DLS microrheology
+analysis with the following columns:</li>
+<li><em>dlsmicro_df columns</em></li>
+<li><em>~~~~~~~~~~~~~~~~~~~</em></li>
+<li><strong>’t’</strong> (<em>time-lags in microseconds</em>)</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="dlsmicro.analysis_tools.msd_local_pwr_law">
+<code class="descclassname">dlsmicro.analysis_tools.</code><code class="descname">msd_local_pwr_law</code><span class="sig-paren">(</span><em>t</em>, <em>g1</em>, <em>q</em>, <em>bw=0.1</em>, <em>replace_neg=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dlsmicro/analysis_tools.html#msd_local_pwr_law"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dlsmicro.analysis_tools.msd_local_pwr_law" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Calculate the local power-law scaling of the MSD and the</dt>
+<dd>smoothed MSD by locally-weighted logarithmic linear regression</dd>
 </dl>
-<dl class="docutils">
-<dt>g1: 1d-array </dt>
-<dd>The intermediate scattering function</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>t</strong> (<em>1d-array</em>) – Vector of time-lags</li>
+<li><strong>g1</strong> (<em>1d-array</em>) – Vector containing the intermediate scattering function at time-lags
+given by <code class="docutils literal notranslate"><span class="pre">t</span></code></li>
+<li><strong>q</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Scattering vector in units of 1/nm</li>
+<li><strong>bw</strong> (float, <cite>optional</cite>) – Bandwith smoothing parameter for locally-weighted regression.
+Reasonable values are typically between 0.05 and 0.1</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>msd_smooth</strong> (<em>1d-array</em>) – Vector of smoothed MSD values from the local regression
+corresponding to the time lags in <code class="docutils literal notranslate"><span class="pre">t</span></code> (in units of nm^2).</li>
+<li><strong>alpha</strong> (<em>1d-array</em>) – Vector of local power-law scaling exponents of the MSD
+corresponding to the time lags in <code class="docutils literal notranslate"><span class="pre">t</span></code>.</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="dlsmicro.analysis_tools.shear_modulus">
+<code class="descclassname">dlsmicro.analysis_tools.</code><code class="descname">shear_modulus</code><span class="sig-paren">(</span><em>t</em>, <em>msd</em>, <em>alpha</em>, <em>r</em>, <em>T</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dlsmicro/analysis_tools.html#shear_modulus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dlsmicro.analysis_tools.shear_modulus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the frequency-dependent complex shear modulus from the
+local power-law scaling behavior of the mean-squared-displacement</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>t</strong> (<em>1d-array</em>) – Time-lags in units of microseconds</li>
+<li><strong>msd</strong> (<em>1d-array</em>) – Mean-squared displacements at the time-lags
+<code class="docutils literal notranslate"><span class="pre">t</span></code> in units of nm^2</li>
+<li><strong>alpha</strong> (<em>1d-array of local power-law scaling exponents</em>) – </li>
+<li><strong>r</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Radius of the probe particles in nanometers</li>
+<li><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Temperature in Kelvin</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>omega</strong> (<em>1d-array</em>) – Vector of angular frequencies in units of rad/s</li>
+<li><strong>G1</strong> (<em>1d-array</em>) – Storage modulus at angular frequencies <code class="docutils literal notranslate"><span class="pre">omega</span></code> in
+units of Pa</li>
+<li><strong>G2</strong> (<em>1d-array</em>) – Loss modulus at angular frequencies <code class="docutils literal notranslate"><span class="pre">omega</span></code> in
+units of Pa</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>This method produces more accurate results in the upper and
+lower frequency extremes than a direct numerical Laplace
+or Fourier transform.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dlsmicro.analysis_tools.shear_modulus_laplace_transform">
+<code class="descclassname">dlsmicro.analysis_tools.</code><code class="descname">shear_modulus_laplace_transform</code><span class="sig-paren">(</span><em>t</em>, <em>msd</em>, <em>r</em>, <em>T</em>, <em>bw=0.01</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dlsmicro/analysis_tools.html#shear_modulus_laplace_transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dlsmicro.analysis_tools.shear_modulus_laplace_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the frequency-dependent shear modulus by direct laplace
+transform of the mean-squared-displacement</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>t</strong> (<em>1d-array</em>) – Time-lags in units of microseconds</li>
+<li><strong>msd</strong> (<em>1d-array</em>) – Mean-squared displacements at the time-lags
+<code class="docutils literal notranslate"><span class="pre">t</span></code> in units of nm^2</li>
+<li><strong>r</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Radius of the probe particles in nanometers</li>
+<li><strong>T</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Temperature in Kelvin</li>
+<li><strong>bw</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a><em>, </em><em>optional</em>) – Bandwith parameter for analytic continuation of
+the laplace transform into fourier space by locally weighted
+regression</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>omega</strong> (<em>1d-array</em>) – Vector of angular frequencies in units of rad/s</li>
+<li><strong>G1</strong> (<em>1d-array</em>) – Storage modulus at angular frequencies <code class="docutils literal notranslate"><span class="pre">omega</span></code> in
+units of Pa</li>
+<li><strong>G2</strong> (<em>1d-array</em>) – Loss modulus at angular frequencies <code class="docutils literal notranslate"><span class="pre">omega</span></code> in
+units of Pa</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>This function returns the shear modulus in the Fourier (omega) domain
+by first transforming to the Laplace (s) domain and then performing
+analytic continuation onto the imaginary axis in the complex plane.</p>
+<p>This method produces erroneous results in the upper and lower frequency
+extremes (roughly the first and last decade of frequencies).</p>
 </dd></dl>
 
 </div>
@@ -189,7 +487,7 @@
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
       
-        <a href="../api.html" class="btn btn-neutral float-left" title="API reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="dlsmicro.io.html" class="btn btn-neutral float-left" title="dlsmicro.io" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

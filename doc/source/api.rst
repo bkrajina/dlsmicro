@@ -7,13 +7,22 @@ API reference
 
 Click any module for detailed descriptions of available functions, usage, etc.
 
-.. _calc_g1:
 
-Calulate intermediate scattering function
------------------------------------------
+Read data exported from Zetasizer
+---------------------------------
 
 .. autosummary::
     :toctree: generated
     :template: autosummary_module.rst
 
-    analysis_tools
+    io
+
+
+Computed particle motion statistics and rheological properties
+--------------------------------------------------------------
+
+.. autosummary::
+    :toctree: generated
+    :template: autosummary_module.rst
+
+    dlsmicro.analysis_tools
