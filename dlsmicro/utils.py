@@ -1,6 +1,8 @@
 import numpy as np
-from numpy import linalg 
+from numpy import linalg
 from numpy import random
+from scipy import integrate
+from scipy.optimize import curve_fit
 
 ##########################################################
 #gauusian_weight
@@ -9,7 +11,7 @@ from numpy import random
 #tau
 ##########################################################
 
-def gaussian_weight(x,i,tau):
+def gaussian_weight(x, i, tau):
     #compute the vector of weights
     w = np.exp(-((x-x[i])**2.)/(tau))
     #transform into a diagonal array
@@ -55,14 +57,14 @@ def loess(x,y,degree,alpha):
     #First degree polynomial regression
     #######################################################
     if degree == 1:
-        
+
         #First feature in the X array is a constant
         #Second feature is the value of x
         const = np.ones(n)
         X = np.array([const,x]).T
         W = np.identity(n)
         tau = alpha * np.sqrt((x[0]-x[-1])**2.)
-      
+
         #Construct the theta matrix
         Theta = np.zeros([2,n])
         #Construct the prediction vector
@@ -81,7 +83,7 @@ def loess(x,y,degree,alpha):
     #Second degree polynomial regression
     #######################################################
     if degree == 2:
-        
+
         #First feature in the X array is a constant
         #Second feature is the value of x
         #Third feature is the value of x**2.
@@ -89,7 +91,7 @@ def loess(x,y,degree,alpha):
         X = np.array([const,x,x**2.]).T
         W = np.identity(n)
         tau = alpha * np.sqrt((x[0]-x[-1])**2.)
-      
+
         #Construct the theta matrix
         Theta = np.zeros([3,n])
 
@@ -113,9 +115,121 @@ def loess(x,y,degree,alpha):
 #f - vector of discrete values of function to be transformed
 #S - vector of Laplace frequencies to evaluate the transform at
 
-def laplace(t,f,S):
-    L = zeros(len(S))
-    for i,s in enumerate(S):
-        y = f*exp(-s*t)
-        L[i] = integrate.trapz(y,t)
+
+def laplace(t, f, S):
+    L = np.zeros(len(S))
+    for i, s in enumerate(S):
+        y = f*np.exp(-s*t)
+        L[i] = integrate.trapz(y, t)
     return L
+
+
+def get_cross_validation_score(t, y, func, p0=None):
+    """ Obtain the leave-one-out cross-validation score for
+    a functional model of a data set over a given fitting window.
+
+    Parameters
+    ----------
+    t : 1-d array
+        Length N vector  of values for the independent variable of a dataset.
+    y : 1-d array
+        Length N vector of values for the dependent variable of a dataset.
+    func : callable function
+           Model to fit the data against. Must be of the form
+           `f(t, p1, p2, ..., pM)` where `t` is the independent variable and
+           `p1, p2, ..., pM` is a set of M parameters to fit.
+
+    p0 : 1-d array or list, `optional`
+         Initial guesses for the M parameters to fit, [p1, p2, ..., pM]
+
+    Returns
+    -------
+    cv : float 
+         Leave-one-out cross-validation score for the model
+    """
+    cv = 0.
+    yskip = y
+    tskip = t
+    n = len(tskip)
+    # Loop over each (t, y) point and perform a
+    # fit to func with that point removed
+    # calculate MSE for that point
+    for i in range(n):
+        ytest = np.delete(yskip, i)
+        ttest = np.delete(tskip, i)
+        try:
+            paramsi = curve_fit(func, ttest, ytest, p0=p0, maxfev=10000)[0]
+            yfiti = func(tskip[i], *paramsi)
+            erri = (yskip[i]-yfiti)**2.
+        except RuntimeError:
+            erri = 1.e3
+        cv = cv + erri
+    # Average cv scores
+    cv = cv/np.float(n)
+
+    # If fit is not found for this window, penalize strongly
+    try:
+        paramsi = curve_fit(func, t, y, p0=p0, maxfev=10000)[0]
+    except RuntimeError:
+        cv = 1.e6
+    return cv
+
+
+def minimize_cv_error(t, y, twindows, func, p0=None):
+    """ Find the fitting interval that minimizes the cross-validation
+    error for a model fitted to a sub-interval of a dataset, 
+    given a set of possible intervals in the independent variable 
+    over which to perform the fit.
+
+    Parameters
+    ----------
+    t : 1-d array
+        Length N vector  of values for the independent variable of a dataset.
+    y : 1-d array
+        Length N vector of values for the dependent variable of a dataset.
+    twindows : List of len 2 lists
+               List of the form [[t0, tend1], [t0, tend2], ...]
+               where [t0, tendi] represents the `ith` closed interval over which to
+               fit the data set and find the cross-validation score.
+    func : callable function
+           Model to fit the data against. Must be of the form
+           `f(t, p1, p2, ..., pM)` where `t` is the independent variable and
+           `p1, p2, ..., pM` is a set of M parameters to fit.
+
+    p0 : 1-d array or list, `optional`
+         Initial guesses for the M parameters to fit, [p1, p2, ..., pM]
+
+    Returns
+    -------
+    twindow_min : List
+                  List of the form `[t0, tend]' where t0 and tend are the
+                  beginning and end of the closed interval in ``t`` that
+                  provides the lowest cross-validation score for the fitted
+                  model
+    pmin : list
+           Optimal parameters for fitting the model ``func`` to the data
+           over the sub-interval ``twindow_min``
+    CV_min : float
+             Leave-one-out cross-validation error for the model ``func``
+             over the interval ``twindow_min``
+    """
+    CVs = []
+    params = []
+    for twindow in twindows:
+        tinds = [np.argmin(np.abs(t-twindow[0])),
+                 np.argmin(np.abs(t-twindow[1]))]
+        tfit = t[tinds[0]: tinds[1]+1]
+        yfit = y[tinds[0]: tinds[1]+1]
+        CVs.append(get_cross_validation_score(tfit, yfit, func, p0))
+        try:
+            paramsi = curve_fit(func, tfit, yfit, p0=p0, maxfev=100000)[0]
+            params.append(paramsi)
+        except RuntimeError:
+            params.append(None)
+    CV_argmin = np.argmin(CVs)
+    CV_min = CVs[CV_argmin]
+    twindow_min = twindows[CV_argmin]
+    pmin = params[CV_argmin]
+    return [twindow_min, pmin, CV_min]
+
+
