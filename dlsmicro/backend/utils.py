@@ -233,3 +233,66 @@ def minimize_cv_error(t, y, twindows, func, p0=None):
     return [twindow_min, pmin, CV_min]
 
 
+def laplace_merge(omega, G1, G2, G1_Fdirect, G2_Fdirect):
+    """ Find the interval where the Laplace transform is valid over
+    the frequency space and replace the Fourier transform data with 
+    the Laplace transform modulus.
+
+    Parameters
+    ----------
+    omega : 1-d array
+            Vector of angular frequencies in units of rad/s
+    G1 : 1-d array
+         Storage modulus at angular frequencies ``omega`` in units of Pa
+         calculated using Fourier transform
+    G2 : 1-d array
+         Loss modulus at angular frequencies ``omega`` in units of Pa
+         calculated using Fourier transform
+    G1_Fdirect: 1-d array
+                Storage modulus at angular frequencies ``omega`` in units 
+                of Pa calculated using direct Laplace transform
+    G2_Fdirect: 1-d array
+                Loss modulus at angular frequencies ``omega`` in units
+                of Pa calculated using direct Laplace transform
+
+    Returns
+    -------
+    G1_plot : 1-d array
+              Loss modulus at angular frequencies ``omega`` in units of Pa
+              after merging Laplace and Fourier transform moduli
+    G2_plot : 1-d array
+              Storage  modulus at angular frequencies ``omega`` in units of
+              Pa after merging Laplace and Fourier transform moduli
+    """
+    G1_lower = 0
+    G2_lower = 0
+    G1_upper = len(omega) - 1
+    G2_upper = len(omega) - 1
+    for n in range(len(omega)-1):
+        if (G1[n]-G1_Fdirect[n])/np.abs(G1[n]-G1_Fdirect[n]) != (G1[n+1]-G1_Fdirect[n+1])/np.abs(G1[n+1]-G1_Fdirect[n+1]):
+            G1_lower = n
+            break
+    for n in range(len(omega)-1):
+        if (G2[n]-G2_Fdirect[n])/np.abs(G2[n]-G2_Fdirect[n]) != (G2[n+1]-G2_Fdirect[n+1])/np.abs(G2[n+1]-G2_Fdirect[n+1]):
+            G2_lower = n
+            break
+    for n in range(len(omega)-1):
+        if (G1[len(omega)-1-n]-G1_Fdirect[len(omega)-1-n])/np.abs(G1[len(omega)-1-n]-G1_Fdirect[len(omega)-1-n]) != (G1[len(omega)-2-n]-G1_Fdirect[len(omega)-2-n])/np.abs(G1[len(omega)-2-n]-G1_Fdirect[len(omega)-2-n]):
+            G1_upper = len(omega)-1-n
+            break
+    for n in range(len(omega)-1):
+        if (G2[len(omega)-1-n]-G2_Fdirect[len(omega)-1-n])/np.abs(G2[len(omega)-1-n]-G2_Fdirect[len(omega)-1-n]) != (G2[len(omega)-2-n]-G2_Fdirect[len(omega)-2-n])/np.abs(G2[len(omega)-2-n]-G2_Fdirect[len(omega)-2-n]):
+            G2_upper = len(omega)-1-n
+            break
+
+    G1_plot = np.zeros_like(G1)
+    G2_plot = np.zeros_like(G2)
+    G1_plot[0:G1_lower] = G1[0:G1_lower]
+    G1_plot[G1_lower:G1_upper] = G1_Fdirect[G1_lower:G1_upper]
+    G1_plot[G1_upper:] = G1[G1_upper:]
+    G2_plot[0:G2_lower] = G2[0:G2_lower]
+    G2_plot[G2_lower:G2_upper] = G2_Fdirect[G2_lower:G2_upper]
+    G2_plot[G2_upper:] = G2[G2_upper:]
+    return G1_plot, G2_plot
+
+
