@@ -7,22 +7,24 @@ API reference
 
 Click any module for detailed descriptions of available functions, usage, etc.
 
+.. _sum_api:
 
-Read data exported from Zetasizer
----------------------------------
-
-.. autosummary::
-    :toctree: generated
-    :template: autosummary_module.rst
-
-    io
-
-
-Computed particle motion statistics and rheological properties
---------------------------------------------------------------
+Adding 2 to a Number
+--------------------
 
 .. autosummary::
     :toctree: generated
     :template: autosummary_module.rst
 
-    dlsmicro.analysis_tools
+    dlsmicro
+
+.. _concat_api:
+
+Concatenating 2 to a String
+---------------------------
+
+.. autosummary::
+    :toctree: generated
+    :template: autosummary_module.rst
+
+    dlsmicro.backend
